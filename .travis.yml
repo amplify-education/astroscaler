@@ -1,0 +1,11 @@
+sudo: true
+language: python
+python: 2.7
+before_install:
+  - sudo apt-get install pandoc
+install:
+  - pip install tox-travis codacy-coverage pypandoc
+script:
+  - bash bin/versionCheck.sh $TRAVIS_BRANCH $TRAVIS_PULL_REQUEST
+  - tox
+  - python-codacy-coverage -r reports/coverage.xml

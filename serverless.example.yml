@@ -1,0 +1,38 @@
+service: astroscaler
+
+package:
+  include:
+    - dependencies/**
+  exclude:
+    - .coverage
+    - .git
+    - .gitignore
+    - astroscaler/**/*.py[cod]
+    - ez_setup.py
+    - MANIFEST.in
+    - requirements.pip
+    - setup.cfg
+    - setup.py
+    - test-requirements.pip
+    - astroscaler.egg-info/**
+    - docs/**
+    - reports/**
+    - test/**
+
+provider:
+  name: aws
+  runtime: python2.7
+  cfLogs: true
+  role: <role-arn-for-astroscaler>
+  region: us-west-2
+
+functions:
+  AstroScaler:
+    handler: astroscaler/handler.handler
+    environment:
+      astroscaler_global_filters: <global-level-filter>
+      astroscaler_config_bucket: <bucket-containing-credentials>
+    memorySize: 128
+    timeout: 300
+    events:
+      - schedule: rate(1 minute)
