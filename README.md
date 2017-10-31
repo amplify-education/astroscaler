@@ -40,7 +40,7 @@ AstroScaler accepts configuration from two sources, environment variables and S3
 AstroScaler reads several environment variables:
 
 * astroscaler_global_filters
-    * An initial level of filtering for all monitors that AstroScaler evaluates. Astroscaler will check for a tag on the monitor matching the filters specified in this environment variable. Multiple filters can be specified, separated by commas. Example: environment:ci,scalable:true
+    * An initial level of filtering for all monitors that AstroScaler evaluates. AstroScaler will check for a tag on the monitor matching the filters specified in this environment variable. Multiple filters can be specified, separated by commas. Example: environment:ci,scalable:true
 * astroscaler_config_bucket
     * The S3 bucket that holds credentials for AstroScaler to use when interacting with Datadog / Spotinst.
 
