@@ -247,3 +247,18 @@ class TestAstroscalerPolicies(TestCase):
         policy.execute(groups=[mock_group])
 
         mock_group.resize.assert_called_once_with(6)
+
+    def test_self_policy_handles_nonsense(self):
+        """ Test that Self Policy does not explode with a nonsense adjustment"""
+        policy = SelfPolicy(
+            monitor_name='test monitor',
+            adjustment="dsafasd",
+            cooldown=60
+        )
+
+        mock_group = MagicMock(max_size=10, min_size=1, desired_size=5)
+        mock_group.is_cooling_down.return_value = False
+
+        policy.execute(groups=[mock_group])
+
+        mock_group.resize.assert_not_called()
