@@ -56,7 +56,7 @@ class AstroScalerGroup(object):
         :param new_size: The new desired size of the group.
         :return: True if successful, false otherwise.
         """
-        return
+        pass
 
     @abstractmethod
     def is_cooling_down(self, cooldown):
@@ -65,7 +65,7 @@ class AstroScalerGroup(object):
         :param cooldown: The number of seconds that must have passed since the most recent scaling action.
         :return: True if the group has scaled within the cooldown period, false otherwise.
         """
-        return
+        pass
 
 
 class AWSGroup(AstroScalerGroup):

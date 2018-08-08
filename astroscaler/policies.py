@@ -29,7 +29,7 @@ class AstroScalerPolicy(object):
         :param group: The AstroScaler group affected by this policy.
         :return: True if the policy should be executed.
         """
-        return
+        pass
 
     # pylint: disable=unused-argument
     @abstractmethod
@@ -39,7 +39,7 @@ class AstroScalerPolicy(object):
         :param groups: The AstroScaler groups against which the policy should be executed
         :return: The groups that were successfully scaled.
         """
-        return
+        pass
 
     def match(self, group):
         """
