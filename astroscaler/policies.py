@@ -241,8 +241,7 @@ class SelfPolicy(AstroScalerPolicy):
             return math.copysign(math.ceil(abs(num_to_add)), num_to_add) + group.desired_size
 
         raise GroupScaleException(
-            "Unable to scale group (%s), adjustment does not make sense",
-            group
+            "Unable to scale group (%s), adjustment does not make sense" % group
         )
 
     def _bound_new_size(self, new_size, min_size, max_size):
