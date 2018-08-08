@@ -314,7 +314,9 @@ class TestAstroscalerHandler(TestCase):
                 LaunchConfigurationName='mock_lcn',
                 MinSize=mock_asg['min_size'],
                 MaxSize=mock_asg['max_size'],
-                DesiredCapacity=mock_asg['desired_size'])
+                DesiredCapacity=mock_asg['desired_size'],
+                AvailabilityZones=["foo"]
+            )
             autoscaling_client.create_or_update_tags(
                 Tags=[{'ResourceId': mock_asg['asg_name'],
                        'Key': 'environment',

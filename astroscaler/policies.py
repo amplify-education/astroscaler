@@ -29,7 +29,7 @@ class AstroScalerPolicy(object):
         :param group: The AstroScaler group affected by this policy.
         :return: True if the policy should be executed.
         """
-        return
+        pass
 
     # pylint: disable=unused-argument
     @abstractmethod
@@ -39,7 +39,7 @@ class AstroScalerPolicy(object):
         :param groups: The AstroScaler groups against which the policy should be executed
         :return: The groups that were successfully scaled.
         """
-        return
+        pass
 
     def match(self, group):
         """
@@ -140,6 +140,7 @@ class SelfPolicy(AstroScalerPolicy):
 
     EXACT_NUM_REGEX = r'^([\d]+)$'
     ADD_INSTANCES_REGEX = r'^([\+-][\d]+)$'
+    EXACT_PERCENTAGE_REGEX = r'^([\d]+)\%$'
     ADD_PERCENTAGE_REGEX = r'^([\+-][\d]+)\%$'
 
     def __init__(self, adjustment, cooldown, monitor_name, filters=None):
@@ -229,10 +230,19 @@ class SelfPolicy(AstroScalerPolicy):
         if add_instances_match:
             return group.desired_size + int(add_instances_match[0])
 
+        exact_percentage_match = re.findall(self.EXACT_PERCENTAGE_REGEX, self.adjustment)
+        if exact_percentage_match:
+            num_to_add = float(exact_percentage_match[0]) / 100 * group.desired_size
+            return group.desired_size + int(math.ceil(num_to_add))
+
         add_percentage_match = re.findall(self.ADD_PERCENTAGE_REGEX, self.adjustment)
         if add_percentage_match:
             num_to_add = float(add_percentage_match[0]) / 100 * group.desired_size
             return math.copysign(math.ceil(abs(num_to_add)), num_to_add) + group.desired_size
+
+        raise GroupScaleException(
+            "Unable to scale group (%s), adjustment does not make sense" % group
+        )
 
     def _bound_new_size(self, new_size, min_size, max_size):
         """
