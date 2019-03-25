@@ -116,15 +116,17 @@ class AWSGroup(AstroScalerGroup):
 
         first_scaling_activity = scaling_activities[0] if scaling_activities else None
         if first_scaling_activity:
-            endtime = first_scaling_activity.get('EndTime')
-            if not endtime:
+            most_recent_scaling_time = first_scaling_activity.get('EndTime')
+            if not most_recent_scaling_time:
                 logger.warning("Scaling activity still ongoing, cannot scale group: %s", self)
                 return True
-            cooldown_limit = datetime.now(endtime.tzinfo) - timedelta(seconds=cooldown)
-            if endtime > cooldown_limit:
+            most_recent_allowed_scaling_time = (
+                datetime.now(most_recent_scaling_time.tzinfo) - timedelta(seconds=cooldown)
+            )
+            if most_recent_scaling_time > most_recent_allowed_scaling_time:
                 logger.warning(
                     "Cooldown has not elapsed (%s seconds remaining), cannot scale group: %s",
-                    (endtime - cooldown_limit).seconds,
+                    (most_recent_scaling_time - most_recent_allowed_scaling_time).seconds,
                     self,
                 )
                 return True
@@ -163,13 +165,13 @@ class SpotinstGroup(AstroScalerGroup):
         event = next((event for event in events if event['eventType'] in self.SPOTINST_SCALING_CAUSES), None)
 
         if event:
-            cooldown_limit = datetime.now(tzutc()) - timedelta(seconds=cooldown)
-            event_time = parse(event['createdAt'])
+            most_recent_allowed_scaling_time = datetime.now(tzutc()) - timedelta(seconds=cooldown)
+            most_recent_scaling_time = parse(event['createdAt'])
 
-            if event_time > cooldown_limit:
+            if most_recent_scaling_time > most_recent_allowed_scaling_time:
                 logger.warning(
                     "Cooldown has not elapsed (%s seconds remaining), cannot scale group: %s",
-                    (event_time - cooldown_limit).seconds,
+                    (most_recent_scaling_time - most_recent_allowed_scaling_time).seconds,
                     self,
                 )
                 return True
