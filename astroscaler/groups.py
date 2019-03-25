@@ -114,11 +114,11 @@ class AWSGroup(AstroScalerGroup):
             if any(reason in activity['Cause'] for reason in self.AWS_SCALING_CAUSES)
         ]
 
-        first_scaling_activity = scaling_activities[0] if scaling_activities else None
-        if not first_scaling_activity:
+        most_recent_scaling_event = scaling_activities[0] if scaling_activities else None
+        if not most_recent_scaling_event:
             return False
 
-        most_recent_scaling_time = first_scaling_activity.get('EndTime')
+        most_recent_scaling_time = most_recent_scaling_event.get('EndTime')
         if not most_recent_scaling_time:
             logger.warning("Scaling activity still ongoing, cannot scale group: %s", self)
             return True
