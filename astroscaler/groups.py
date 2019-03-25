@@ -122,7 +122,11 @@ class AWSGroup(AstroScalerGroup):
                 return True
             cooldown_limit = datetime.now(endtime.tzinfo) - timedelta(seconds=cooldown)
             if endtime > cooldown_limit:
-                logger.warning("Cooldown has not elapsed, cannot scale group: %s", self)
+                logger.warning(
+                    "Cooldown has not elapsed (%s seconds remaining), cannot scale group: %s",
+                    (endtime - cooldown_limit).seconds,
+                    self,
+                )
                 return True
 
         return False
@@ -163,7 +167,11 @@ class SpotinstGroup(AstroScalerGroup):
             event_time = parse(event['createdAt'])
 
             if event_time > cooldown_limit:
-                logger.warning("Cooldown has not elapsed, cannot scale group: %s", self)
+                logger.warning(
+                    "Cooldown has not elapsed (%s seconds remaining), cannot scale group: %s",
+                    (event_time - cooldown_limit).seconds,
+                    self,
+                )
                 return True
 
         return False
