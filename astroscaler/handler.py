@@ -98,6 +98,7 @@ class AstroScaler(object):
                 scaled_groups = policy.execute(groups=groups)
                 if scaled_groups:
                     executed_policies.append(policy)
+                    logger.info("Policy successfully executed: %s", policy)
                 else:
                     logger.warning("Policy should have executed, but no groups scaled: %s", policy)
             except GroupScaleException:
