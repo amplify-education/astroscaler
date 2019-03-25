@@ -114,16 +114,24 @@ class AWSGroup(AstroScalerGroup):
             if any(reason in activity['Cause'] for reason in self.AWS_SCALING_CAUSES)
         ]
 
-        first_scaling_activity = scaling_activities[0] if scaling_activities else None
-        if first_scaling_activity:
-            endtime = first_scaling_activity.get('EndTime')
-            if not endtime:
-                logger.warning("Scaling activity still ongoing, cannot scale group: %s", self)
-                return True
-            cooldown_limit = datetime.now(endtime.tzinfo) - timedelta(seconds=cooldown)
-            if endtime > cooldown_limit:
-                logger.warning("Cooldown has not elapsed, cannot scale group: %s", self)
-                return True
+        most_recent_scaling_event = scaling_activities[0] if scaling_activities else None
+        if not most_recent_scaling_event:
+            return False
+
+        most_recent_scaling_time = most_recent_scaling_event.get('EndTime')
+        if not most_recent_scaling_time:
+            logger.warning("Scaling activity still ongoing, cannot scale group: %s", self)
+            return True
+
+        most_recent_allowed_scaling_time = most_recent_scaling_time + timedelta(seconds=cooldown)
+        current_time = datetime.now(most_recent_scaling_time.tzinfo)
+        if current_time < most_recent_allowed_scaling_time:
+            logger.warning(
+                "Cooldown has not elapsed (%s seconds remaining), cannot scale group: %s",
+                (most_recent_allowed_scaling_time - current_time).seconds,
+                self,
+            )
+            return True
 
         return False
 
@@ -158,13 +166,19 @@ class SpotinstGroup(AstroScalerGroup):
 
         event = next((event for event in events if event['eventType'] in self.SPOTINST_SCALING_CAUSES), None)
 
-        if event:
-            cooldown_limit = datetime.now(tzutc()) - timedelta(seconds=cooldown)
-            event_time = parse(event['createdAt'])
+        if not event:
+            return False
 
-            if event_time > cooldown_limit:
-                logger.warning("Cooldown has not elapsed, cannot scale group: %s", self)
-                return True
+        most_recent_scaling_time = parse(event['createdAt'])
+        most_recent_allowed_scaling_time = most_recent_scaling_time + timedelta(seconds=cooldown)
+        current_time = datetime.now(tzutc())
+        if current_time < most_recent_allowed_scaling_time:
+            logger.warning(
+                "Cooldown has not elapsed (%s seconds remaining), cannot scale group: %s",
+                (most_recent_allowed_scaling_time - current_time).seconds,
+                self,
+            )
+            return True
 
         return False
 
