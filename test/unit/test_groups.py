@@ -4,13 +4,15 @@ from unittest import TestCase
 
 from botocore.exceptions import ClientError
 from dateutil.tz import tzutc
-from mock import MagicMock
+from mock import MagicMock, patch
 
 from astroscaler.exceptions import GroupScaleException, SpotinstApiException
 from astroscaler.groups import AWSGroup, SpotinstGroup
 
 
-YESTERDAYS_DATE = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+NOW = datetime.now(tzutc())
+NOW_TIMESTAMP = NOW.strftime("%s") + "000"
+ONE_HOUR_AGO_TIMESTAMP = (NOW - timedelta(hours=1)).strftime("%s") + "000"
 
 
 class TestAstroscalerGroups(TestCase):
@@ -172,6 +174,7 @@ class TestAstroscalerGroups(TestCase):
             adjustment=1
         )
 
+    @patch('astroscaler.groups.datetime', MagicMock(now=MagicMock(return_value=NOW)))
     def test_spotinst_group_cannot_get_events(self):
         """ Test that Spotinst Group handles API errors while getting event history"""
         mock_client = MagicMock()
@@ -193,15 +196,17 @@ class TestAstroscalerGroups(TestCase):
 
         mock_client.get_group_events.assert_called_once_with(
             group_id=group.identifier,
-            from_date=YESTERDAYS_DATE
+            from_date=ONE_HOUR_AGO_TIMESTAMP,
+            to_date=NOW_TIMESTAMP,
         )
 
+    @patch('astroscaler.groups.datetime', MagicMock(now=MagicMock(return_value=NOW)))
     def test_spotinst_group_in_cooldown_period(self):
         """ Test that Spotinst Group is cooling down if the cooldown period hasnt expired """
         mock_client = MagicMock()
         mock_client.get_group_events.return_value = [
             {
-                "eventType": SpotinstGroup.SPOTINST_SCALING_CAUSES[0],
+                "message": SpotinstGroup.SPOTINST_SCALING_CAUSES[0],
                 "createdAt": datetime.now(tzutc()).isoformat()
             }
         ]
@@ -224,15 +229,17 @@ class TestAstroscalerGroups(TestCase):
 
         mock_client.get_group_events.assert_called_once_with(
             group_id=group.identifier,
-            from_date=YESTERDAYS_DATE
+            from_date=ONE_HOUR_AGO_TIMESTAMP,
+            to_date=NOW_TIMESTAMP,
         )
 
+    @patch('astroscaler.groups.datetime', MagicMock(now=MagicMock(return_value=NOW)))
     def test_spotinst_group_not_in_cooldown(self):
         """ Test that Spotinst Group is not cooling down if the cooldown period has expired """
         mock_client = MagicMock()
         mock_client.get_group_events.return_value = [
             {
-                "eventType": SpotinstGroup.SPOTINST_SCALING_CAUSES[0],
+                "message": SpotinstGroup.SPOTINST_SCALING_CAUSES[0],
                 "createdAt": (datetime.now(tzutc()) - timedelta(minutes=5)).isoformat()
             }
         ]
@@ -255,9 +262,11 @@ class TestAstroscalerGroups(TestCase):
 
         mock_client.get_group_events.assert_called_once_with(
             group_id=group.identifier,
-            from_date=YESTERDAYS_DATE
+            from_date=ONE_HOUR_AGO_TIMESTAMP,
+            to_date=NOW_TIMESTAMP,
         )
 
+    @patch('astroscaler.groups.datetime', MagicMock(now=MagicMock(return_value=NOW)))
     def test_spotinst_group_cooldown_no_events(self):
         """ Test that Spotinst Group is not cooling down if there are no events """
         mock_client = MagicMock()
@@ -281,5 +290,6 @@ class TestAstroscalerGroups(TestCase):
 
         mock_client.get_group_events.assert_called_once_with(
             group_id=group.identifier,
-            from_date=YESTERDAYS_DATE
+            from_date=ONE_HOUR_AGO_TIMESTAMP,
+            to_date=NOW_TIMESTAMP,
         )

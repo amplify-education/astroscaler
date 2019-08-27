@@ -69,12 +69,16 @@ class TestSpotinstClient(TestCase):
         """Test client makes correct request for getting group events"""
         self.spotinst_client._make_request = MagicMock(return_value={"response": {"items": []}})
 
-        self.spotinst_client.get_group_events(group_id="foo", from_date="bar")
+        self.spotinst_client.get_group_events(group_id="foo", from_date="bar", to_date="baz")
 
         self.spotinst_client._make_request.assert_called_once_with(
             method='get',
-            path='aws/ec2/group/foo/events',
-            params={'fromDate': 'bar'}
+            path='aws/ec2/group/foo/logs',
+            params={
+                'fromDate': 'bar',
+                'toDate': 'baz',
+                'limit': 1000,
+            }
         )
 
     def test_make_request_helper_happy_path(self):
