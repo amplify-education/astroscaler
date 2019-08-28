@@ -164,8 +164,8 @@ class SpotinstGroup(AstroScalerGroup):
         now = datetime.now()
         one_hour_ago = now - timedelta(hours=1)
         # Spotinst expects the timestamps to come as milliseconds, not seconds, so add some extra zeros
-        from_date = one_hour_ago.strftime("%s") + "000"
-        to_date = now.strftime("%s") + "000"
+        from_date = int(one_hour_ago.strftime("%s")) * 1000
+        to_date = int(now.strftime("%s")) * 1000
 
         try:
             events = self.client.get_group_events(
