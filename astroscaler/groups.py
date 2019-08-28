@@ -125,7 +125,7 @@ class AWSGroup(AstroScalerGroup):
 
         most_recent_allowed_scaling_time = most_recent_scaling_time + timedelta(seconds=cooldown)
         current_time = datetime.now(most_recent_scaling_time.tzinfo)
-        if current_time < most_recent_allowed_scaling_time:
+        if current_time <= most_recent_allowed_scaling_time:
             logger.warning(
                 "Cooldown has not elapsed (%s seconds remaining), cannot scale group: %s",
                 (most_recent_allowed_scaling_time - current_time).seconds,
@@ -192,7 +192,7 @@ class SpotinstGroup(AstroScalerGroup):
         most_recent_scaling_time = parse(event['createdAt'])
         most_recent_allowed_scaling_time = most_recent_scaling_time + timedelta(seconds=cooldown)
         current_time = datetime.now(tzutc())
-        if current_time < most_recent_allowed_scaling_time:
+        if current_time <= most_recent_allowed_scaling_time:
             logger.warning(
                 "Cooldown has not elapsed (%s seconds remaining), cannot scale group: %s",
                 (most_recent_allowed_scaling_time - current_time).seconds,
