@@ -70,17 +70,22 @@ class SpotinstClient(object):
             params={"adjustment": adjustment}
         )
 
-    def get_group_events(self, group_id, from_date):
+    def get_group_events(self, group_id, from_date, to_date):
         """
         Returns any group events for the given group.
         :param group_id: The Spotinst group id.
-        :param from_date: Only events from this date forward will be returned.
+        :param from_date: Only events from this timestamp forward will be returned.
+        :param to_date: Only events from this timestamp backward will be returned.
         :return: List of events.
         """
         response = self._make_request(
             method='get',
-            path='aws/ec2/group/{0}/events'.format(group_id),
-            params={"fromDate": from_date}
+            path='aws/ec2/group/{0}/logs'.format(group_id),
+            params={
+                "fromDate": from_date,
+                "toDate": to_date,
+                "limit": 1000,
+            }
         )
 
         return response['response']['items']

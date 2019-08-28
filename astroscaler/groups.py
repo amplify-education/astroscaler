@@ -125,7 +125,7 @@ class AWSGroup(AstroScalerGroup):
 
         most_recent_allowed_scaling_time = most_recent_scaling_time + timedelta(seconds=cooldown)
         current_time = datetime.now(most_recent_scaling_time.tzinfo)
-        if current_time < most_recent_allowed_scaling_time:
+        if current_time <= most_recent_allowed_scaling_time:
             logger.warning(
                 "Cooldown has not elapsed (%s seconds remaining), cannot scale group: %s",
                 (most_recent_allowed_scaling_time - current_time).seconds,
@@ -139,7 +139,13 @@ class AWSGroup(AstroScalerGroup):
 class SpotinstGroup(AstroScalerGroup):
     """Implementation of AstroScalerGroup for Spotinst"""
 
-    SPOTINST_SCALING_CAUSES = ['Scale', 'Update']
+    SPOTINST_SCALING_CAUSES = [
+        'Scale',
+        'Updating',
+        'have been launched',
+        'have been detacted',
+        'successfully created',
+    ]
 
     def __init__(self, provider_group, client):
         metadata = spotinst_tags_to_dict(
@@ -155,16 +161,30 @@ class SpotinstGroup(AstroScalerGroup):
         self._client = client
 
     def is_cooling_down(self, cooldown):
-        yesterdays_date = datetime.now() - timedelta(days=1)
-        from_date = yesterdays_date.strftime("%Y-%m-%d")
+        now = datetime.now()
+        one_hour_ago = now - timedelta(hours=1)
+        # Spotinst expects the timestamps to come as milliseconds, not seconds, so add some extra zeros
+        from_date = int(one_hour_ago.strftime("%s")) * 1000
+        to_date = int(now.strftime("%s")) * 1000
 
         try:
-            events = self.client.get_group_events(group_id=self.identifier, from_date=from_date)
+            events = self.client.get_group_events(
+                group_id=self.identifier,
+                from_date=from_date,
+                to_date=to_date,
+            )
         except SpotinstApiException:
             logger.exception("Unable to resize group: %s", self)
             raise GroupScaleException("Unable to resize group: {0}".format(self))
 
-        event = next((event for event in events if event['eventType'] in self.SPOTINST_SCALING_CAUSES), None)
+        event = next(
+            (
+                event
+                for event in events
+                if any(reason in event['message'] for reason in self.SPOTINST_SCALING_CAUSES)
+            ),
+            None
+        )
 
         if not event:
             return False
@@ -172,7 +192,7 @@ class SpotinstGroup(AstroScalerGroup):
         most_recent_scaling_time = parse(event['createdAt'])
         most_recent_allowed_scaling_time = most_recent_scaling_time + timedelta(seconds=cooldown)
         current_time = datetime.now(tzutc())
-        if current_time < most_recent_allowed_scaling_time:
+        if current_time <= most_recent_allowed_scaling_time:
             logger.warning(
                 "Cooldown has not elapsed (%s seconds remaining), cannot scale group: %s",
                 (most_recent_allowed_scaling_time - current_time).seconds,
