@@ -11,8 +11,8 @@ from astroscaler.groups import AWSGroup, SpotinstGroup
 
 
 NOW = datetime.now(tzutc())
-NOW_TIMESTAMP = NOW.strftime("%s") + "000"
-ONE_HOUR_AGO_TIMESTAMP = (NOW - timedelta(hours=1)).strftime("%s") + "000"
+NOW_TIMESTAMP = int(NOW.strftime("%s")) * 1000
+ONE_HOUR_AGO_TIMESTAMP = int((NOW - timedelta(hours=1)).strftime("%s")) * 1000
 
 
 class TestAstroscalerGroups(TestCase):
