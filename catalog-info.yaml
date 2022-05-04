@@ -1,0 +1,9 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: astroscaler
+  annotations:
+    github.com/project-slug: amplify-education/astroscaler
+spec:
+  type: other
+  lifecycle: unknown
