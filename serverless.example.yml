@@ -10,10 +10,10 @@ package:
     - astroscaler/**/*.py[cod]
     - ez_setup.py
     - MANIFEST.in
-    - requirements.pip
+    - requirements.txt
     - setup.cfg
     - setup.py
-    - test-requirements.pip
+    - test-requirements.txt
     - astroscaler.egg-info/**
     - docs/**
     - reports/**
