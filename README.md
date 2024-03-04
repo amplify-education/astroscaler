@@ -1,6 +1,5 @@
 # AstroScaler
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/3f113e10586240a2877b7535f4bef560)](https://www.codacy.com/app/CFER/astroscaler?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=amplify-education/astroscaler&amp;utm_campaign=Badge_Grade)
-[![Build Status](https://travis-ci.org/amplify-education/astroscaler.svg?branch=master)](https://travis-ci.org/amplify-education/astroscaler)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/amplify-education/data_kennel/master/LICENSE)
 [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/3f113e10586240a2877b7535f4bef560)](https://www.codacy.com/app/CFER/astroscaler?utm_source=github.com&utm_medium=referral&utm_content=amplify-education/astroscaler&utm_campaign=Badge_Coverage)
 
